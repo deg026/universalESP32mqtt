@@ -29,6 +29,7 @@ void eeprom_writeConfig()
 
     prefs.putChar("LED_PIN", LED_PIN);
     prefs.putChar("ONEWIRE_PIN", ONEWIRE_PIN);
+    prefs.putUShort("TEMPER_timeout", TEMPER_timeout);
 
     byte i;
 
@@ -67,6 +68,7 @@ void eeprom_readConfig()
 
         LED_PIN = prefs.getChar("LED_PIN", LED_PIN);
         ONEWIRE_PIN = prefs.getChar("ONEWIRE_PIN", ONEWIRE_PIN);
+        TEMPER_timeout = prefs.getUShort("TEMPER_timeout", TEMPER_timeout);
 
         byte i;
 

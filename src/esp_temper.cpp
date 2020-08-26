@@ -15,7 +15,7 @@ float lastthermometer[10];
 int TEMPER_count = 0;
 
 uint32_t TEMPER_nexttimeout = 0; // timeout for next handler run
-const uint32_t TEMPER_timeout = 20000; // timeout before next read sensors
+uint16_t TEMPER_timeout = 20; // timeout in seconds before next read sensors
 const uint32_t TEMPER_timeupdate = 7200000; // time to force update sensor's values on MQTT server (in case when value is static, to show that we alive)
 uint32_t lastTemp;    //sensor get value list timestamp
 uint32_t lastUpdate;  //mqtt value update last timestamp
@@ -105,7 +105,7 @@ void TEMPER_handle()
             if (lastUpdate == 0)
                 lastUpdate = millis();
 
-            TEMPER_nexttimeout = TEMPER_timeout; //default timeout between temperature requests
+            TEMPER_nexttimeout = TEMPER_timeout * 1000; //default timeout between temperature requests
         }
         lastTemp = millis();
         TEMPER_needrequest =! TEMPER_needrequest;

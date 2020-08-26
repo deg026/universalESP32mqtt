@@ -26,8 +26,8 @@ extern String HTTP_password;
 extern int8_t LED_PIN;
 
 //TEMPER
-typedef uint8_t DeviceAddress[8];
 extern int8_t ONEWIRE_PIN;
+extern uint16_t TEMPER_timeout;
 
 //RELAY
 extern uint8_t relaycount;

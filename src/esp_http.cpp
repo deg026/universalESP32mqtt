@@ -257,6 +257,8 @@ void page_setup()
 <br><br><br>\
 <b>1-Wire pin:</b>\
 <br><input type='text' name='wirepin' size='2' value='" + (ONEWIRE_PIN > -1 ? String(ONEWIRE_PIN) : "") + "'>\
+<b>1-Wire update period:</b>\
+<br><input type='text' name='wireupdate' size='2' value='" + String(TEMPER_timeout) + "'> sec\
 <br><br><input type='submit' value='Save'>\
 </form>\
 ";
@@ -349,6 +351,8 @@ void page_store()
                 HTTP_password = argValue;
             else if (argName == "ledpin")
                 LED_PIN = argValue.toInt();
+            else if (argName == "wireupdate" && argValue.toInt() > 1)
+                TEMPER_timeout = argValue.toInt();
             else if (argName == "wirepin")
                 ONEWIRE_PIN = (argValue.toInt() > 0 || argValue == "0" ? argValue.toInt() : -1);
             else if (argName == "mqttserver")
