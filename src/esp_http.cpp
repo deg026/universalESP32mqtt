@@ -33,6 +33,18 @@ String quoteEscape(const String& str)
     return result;
 }
 
+
+
+String getMacAddress()
+{
+    uint8_t baseMac[6];
+    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+    char baseMacChr[18] = {0};
+    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+    return String(baseMacChr);
+}
+
+
 bool HTTP_auth()
 {
     if (HTTP_user.length() && HTTP_password.length() && !httpserver.authenticate(HTTP_user.c_str(), HTTP_password.c_str()))
@@ -130,7 +142,7 @@ void page_root()
     if(!HTTP_auth())
         return;
 
-    String message = "<form>WiFi mode: ";
+    String message = "<form id='rootform'>ESP mac ID: " + getMacAddress() + "<br>WiFi mode: ";
 
     switch (WiFi.getMode()) {
         case WIFI_OFF:
@@ -180,7 +192,7 @@ void page_root()
         }
     }
 
-    message += TEMPER_getInfo();
+    message += "<br><br>Temperature sensors:<br>" + TEMPER_getInfo();
 
     HTML_page("System dashboard:", message);
 }
@@ -257,7 +269,7 @@ void page_setup()
 <br><br><br>\
 <b>1-Wire pin:</b>\
 <br><input type='text' name='wirepin' size='2' value='" + (ONEWIRE_PIN > -1 ? String(ONEWIRE_PIN) : "") + "'>\
-<b>1-Wire update period:</b>\
+<br><b>1-Wire update period:</b>\
 <br><input type='text' name='wireupdate' size='2' value='" + String(TEMPER_timeout) + "'> sec\
 <br><br><input type='submit' value='Save'>\
 </form>\

@@ -59,9 +59,9 @@ String getSensorAddress(DeviceAddress deviceAddress)
 
 String TEMPER_getInfo()
 {
-    String message = "<br><br>";
+    String message = "";
     for (byte i = 0; i < TEMPER_count; i++)
-        message += "<br>T" + String(i) + " [" + getSensorAddress(thermometer[i]) + "]: " + String(lastthermometer[i]) + " &deg;C";
+        message += "T" + String(i) + " [" + getSensorAddress(thermometer[i]) + "]: " + String(lastthermometer[i]) + " &deg;C<br>";
     return message;
 }
 
@@ -69,7 +69,7 @@ String TEMPER_getInfo()
 float getTemperature(DeviceAddress deviceAddress)
 {
     float tempC = TEMPER_sensors.getTempC(deviceAddress);
-    if(tempC == DEVICE_DISCONNECTED_C)
+    if(tempC == DEVICE_DISCONNECTED_C || tempC == 85)
         return 9999;
 
     return tempC;
