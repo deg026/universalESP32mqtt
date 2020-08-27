@@ -29,6 +29,20 @@ void RELAY_setup()
 }
 
 
-void RELAY_handle()
+String RELAY_getInfo()
 {
+    String message = "";
+    for (byte i = 0; i < relaycount; i++)
+    {
+        if (relayPins[i] > -1)
+        {
+            message += " <input type='checkbox' class='checkbox' id='relay" + String(i) +
+                       "' onchange=\"openUrl('/switch?s=" + String(i) + "&on=' + this.checked);\"";
+            if (digitalRead(relayPins[i]))
+                message += "checked ";
+
+            message += "> <label for='relay" + String(i) + "'> #" + String(i) + " (PIN: " + String(relayPins[i]) + ")</label>";
+        }
+    }
+    return message;
 }

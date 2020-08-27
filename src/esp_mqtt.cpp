@@ -103,10 +103,9 @@ void MQTT_handle()
 {
     if (MQTT_server.length() && MQTT_port > 0 && WiFi.getMode() == WIFI_STA)
     {
-        if (! pubsubClient.connected())
-            MQTT_connect();
-
         if (pubsubClient.connected())
             pubsubClient.loop();
+        else
+            MQTT_connect();
     }
 }

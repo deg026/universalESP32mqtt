@@ -4,6 +4,7 @@
 #include <Update.h>
 #include <esp_eeprom.h>
 #include <esp_relay.h>
+#include <esp_input.h>
 #include <esp_mqtt.h>
 #include <esp_temper.h>
 
@@ -17,6 +18,29 @@ const char* HTTP_realm = "Please authorize (def: admin/admin)";
 String HTTP_autherror = "User authorization failed...";
 
 
+
+String bestpins = " <pre>Best PINs usage, from best to worst (<B class='bi'>I</B>nput, <B class='bo'>O</B>utput, <B class='ba'>A</B>nalog, <B class='bud'>u</B> - pullup, <B class='bud'>d</B> - pulldown):\n"
+                  " 39 - <B class='bi'>I</B><B class='bud'>d</B>\n"
+                  " 36 - <B class='bi'>I</B><B class='bud'>d</B>\n"
+                  " 35 - <B class='bi'>I</B><B class='bud'>d</B>\n"
+                  " 34 - <B class='bi'>I</B><B class='bud'>d</B> / <B class='ba'>A</B>\n"
+                  " 33 - <B class='bi'>I</B> / <B class='bo'>O</B> / <B class='ba'>A</B>\n"
+                  " 32 - <B class='bi'>I</B> / <B class='bo'>O</B> / <B class='ba'>A</B>\n"
+                  " 27 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 26 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 25 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 23 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 22 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 21 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 19 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 18 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 14 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  "  4 - <B class='bi'>I</B> / <B class='bo'>O</B>\n"
+                  " 17 - <B class='bi'>I</B> / <B class='bo'>O</B> (in some device used for internal Flash)\n"
+                  " 16 - <B class='bi'>I</B> / <B class='bo'>O</B> (in some device used for internal Flash)\n"
+                  " 15 - <B class='bi'>I</B> (if pulled low there will be no output on the Serial port)\n"
+                  "  5 - <B class='bi'>I</B> / <B class='bo'>O</B> (connected to internal LED on some devices)\n"
+                  "  2 - <B class='bi'>I</B><B class='bud'>u</B> / <B class='bo'>O</B> (connected to internal LED on most devices)</pre>";
 
 String style =
         "<style>#file-input,input{width:100%;height:44px;border-radius:4px;margin:10px auto;font-size:15px}"
@@ -112,6 +136,40 @@ void HTML_page(const String& title, const String& body)
   text-align: right;\
   padding:    5px;\
 }\
+#rootform p {\
+    margin: 9px;\
+    width: 260px;\
+}\
+#rootform p b {\
+    display: block;\
+    float: right;\
+}\
+span.inputinfo {\
+    display: inline-block;\
+    border: solid 1px black;\
+    background: #999999;\
+    color: black;\
+    width: 16px;\
+    height: 16px;\
+    padding: 4px;\
+}\
+span.inputinfo.inputon {\
+    border: solid 1px #008800;\
+    background: #aaffaa;\
+    color: red;\
+}\
+b.bi {\
+    color: green;\
+}\
+b.bo {\
+    color: red;\
+}\
+b.ba {\
+    color: blue;\
+}\
+b.bud {\
+    color: orange;\
+}\
 </style>\
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>\
 <script>\
@@ -127,10 +185,14 @@ function openUrl(url) {\
 <input type='button' value='Base setup' onclick=\"location.href='/setup';\">\
 <input type='button' value='MQTT' onclick=\"location.href='/mqtt';\">\
 <input type='button' value='Relays' onclick=\"location.href='/relay';\">\
+<input type='button' value='Inputs' onclick=\"location.href='/input';\">\
+<input type='button' value='Analog' onclick=\"location.href='/analog';\">\
 <input type='button' value='Firmware' onclick=\"location.href='/firmware';\">\
 <input type='button' value='Defaults!' onclick=\"if(confirm('Are you sure to reset settings to default?')) openUrl('/reset');\">\
 <input type='button' value='Reboot!' onclick=\"if(confirm('Are you sure to reboot?')) openUrl('/reboot');\">\
-<br><h3>" + title + "</h3>" + body + "</body></html>";
+<br><h3>" + title + "</h3>" + body + "</body></html>\
+";
+
 
     httpserver.sendHeader("Connection", "close");
     httpserver.send(200, "text/html", message);
@@ -142,7 +204,7 @@ void page_root()
     if(!HTTP_auth())
         return;
 
-    String message = "<form id='rootform'>ESP mac ID: " + getMacAddress() + "<br>WiFi mode: ";
+    String message = "<form id='rootform'><p>ESP mac ID: <b>" + getMacAddress() + "</b></p><p>WiFi mode: <b>";
 
     switch (WiFi.getMode()) {
         case WIFI_OFF:
@@ -161,38 +223,33 @@ void page_root()
             message += "Unknown!";
     }
 
-    message += "<br>MQTT broker: ";
+    message += "</b></p><p>MQTT broker: <b>";
 
     if (!MQTT_isconnected())
-        message += "not ";
+        message += "OFF";
+    else
+        message += "ON";
 
     //Current UPtime in seconds
     uint32_t tm = millis() / 1000;
 
-    message += "connected<br>"
-               "Heap free size: " + String(ESP.getFreeHeap()) + " bytes<br>"
-               "Uptime: "
+    message += " (" + MQTT_client + ")</b></p>"
+               "<p>CPU freq: <b>" + String(ESP.getCpuFreqMHz()) + " MHz</b></p>"
+               "<p>Free memory: <b>" + String(ESP.getFreeHeap()) + " b</b></p>"
+               "<p>Flash size: <b>" + String(ESP.getFlashChipSize()) + " b</b></p>"
+               "<p>Program size: <b>" + String(ESP.getSketchSize() + ESP.getFreeSketchSpace()) + " b</b></p>"
+               "<p>Sketch size: <b>" + String(ESP.getSketchSize()) + " b</b></p>"
+               "<p>Free for sketch: <b>" + String(ESP.getFreeSketchSpace()) + " b</b></p>"
+               "<p>Uptime: <b>"
                + (tm > 60 * 60 * 24 ? String(int(tm / 60 / 60 / 24 % 365)) + "D " : "")
                + (tm > 60 * 60  ? String(int(tm / 60 / 60 % 24)) + "H " : "")
                + (tm > 60 ? String(int((tm + 1) / 60 % 60)) + "m " : "")
-               + String(int(tm % 60)) + "s " +
-               "<br><br>"
-               "RELAYS: ";
+               + String(int(tm % 60)) + "s</b></p>"
+               "<br><br><b>RELAYS:</b>" + RELAY_getInfo() +
+               "<br><br><b>INPUTS:</b>" + INPUT_getInfo();
 
-    for (byte i = 0; i < relaycount; i++)
-    {
-        if (relayPins[i] > -1)
-        {
-            message += " <input type='checkbox' class='checkbox' id='relay" + String(i) +
-                       "' onchange=\"openUrl('/switch?s=" + String(i) + "&on=' + this.checked);\"";
-            if (digitalRead(relayPins[i]))
-                message += "checked ";
 
-            message += "> <label for='relay" + String(i) + "'> #" + String(i) + " (PIN: " + String(relayPins[i]) + ")</label>";
-        }
-    }
-
-    message += "<br><br>Temperature sensors:<br>" + TEMPER_getInfo();
+    message += "<br><br><b>TEMPERATURE sensors:</b><br>" + TEMPER_getInfo();
 
     HTML_page("System dashboard:", message);
 }
@@ -313,6 +370,7 @@ void page_relay()
 
     // language=HTML
     String message = "<form id='relayform' name='relay' method='get' action='/store'>\
+<input type='hidden' name='relaysetup' value='1'>\
 <table border='0'><tr><td><b>PIN IDs:</b>\
 ";
     byte i;
@@ -333,9 +391,60 @@ void page_relay()
         message += "> OFF";
     }
 
-    message += "</td></tr></table><br><input type='submit' value='Save'></form>";
+    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
 
     HTML_page("Relay Setup:", message);
+}
+
+
+void page_input()
+{
+    if(!HTTP_auth())
+        return;
+
+    // language=HTML
+    String message = "<form id='inputform' name='input' method='get' action='/store'>\
+<input type='hidden' name='inputsetup' value='1'>\
+<table border='0'><tr><td style='padding-right: 15px;'><b>PIN IDs:</b>\
+";
+    byte i;
+
+    for (i = 0; i < inputcount; i++)
+    {
+        message += "<br>#" + String(i) + ": <input type='text' size='2' name='inputpin" + String(i) + "' value='" + (inputPins[i] > -1 ? String(inputPins[i]) : "") + "'>";
+    }
+
+    message += "</td><td style='border-left: dashed 1px black;padding: 0px 15px;'><b>Input type:</b>";
+
+    for (i = 0; i < relaycount; i++)
+    {
+        message += "<br><input type='radio' name='inputtype" + String(i) + "' value='0' ";
+        if (inputTypes[i] % 10 == 0) message += "checked ";
+        message += "> NORMAL &nbsp; <input type='radio' name='inputtype" + String(i) + "' value='1' ";
+        if (inputTypes[i] % 10 == 1) message += "checked ";
+        message += "> PULLUP &nbsp; <input type='radio' name='inputtype" + String(i) + "' value='2' ";
+        if (inputTypes[i] % 10 == 2) message += "checked ";
+        message += "> PULLDOWN";
+    }
+
+    message += "</td><td style='border-left: dashed 1px black;padding: 0px 15px;'><b>MTQQ send:</b>";
+
+    for (i = 0; i < relaycount; i++)
+    {
+        message += "<br><input type='radio' name='inputsend" + String(i) + "' value='0' ";
+        if (inputTypes[i] < 10) message += "checked ";
+        message += "> HIGH & LOW &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='1' ";
+        if (inputTypes[i] >= 10 && inputTypes[i] < 20) message += "checked ";
+        message += "> only HIGH &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='2' ";
+        if (inputTypes[i] >= 20 && inputTypes[i] < 30) message += "checked ";
+        message += "> only LOW &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='3' ";
+        if (inputTypes[i] >= 30) message += "checked ";
+        message += "> BUTTON (click, longpress, dblclick)";
+    }
+
+    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
+
+    HTML_page("Inputs Setup:", message);
 }
 
 
@@ -345,15 +454,82 @@ void page_store()
         return;
 
     String argName, argValue;
+    byte r, i;
 
-    for (byte i = 0; i < httpserver.args(); i++)
+    bool isRelaySetup = (httpserver.arg("relaysetup") == "1");
+    bool isInputSetup = (httpserver.arg("inputsetup") == "1");
+    bool isAnalogSetup = (httpserver.arg("analogsetup") == "1");
+
+    if(isRelaySetup)
+    {
+        for (r = 0; r < relaycount; r++)
+        {
+            relayOnBoot[r] = false;
+            relayPins[r] = -1;
+        }
+    }
+    if(isInputSetup)
+    {
+        for (r = 0; r < inputcount; r++)
+        {
+            inputTypes[r] = 0;
+            inputPins[r] = -1;
+        }
+    }
+
+    for (i = 0; i < httpserver.args(); i++)
     {
         argName = httpserver.argName(i);
         argValue = httpserver.arg(i);
 
         if(argValue.length() <= maxStrParamLength)
         {
-            if (argName == "ssid")
+            if(isRelaySetup)
+            {
+                for (r = 0; r < relaycount; r++)
+                {
+                    if (argName == ("onboot" + String(r)))
+                    {
+                        relayOnBoot[r] = (argValue.toInt() > 0 ? 1 : 0);
+                        break;
+                    }
+                    else if (argName == ("pinid" + String(r)))
+                    {
+                        if (argValue.toInt() > 0 || argValue == "0")
+                            relayPins[r] = argValue.toInt();
+                        else
+                            relayPins[r] = -1;
+                        break;
+                    }
+                }
+                continue;
+            }
+            else if(isInputSetup)
+            {
+                for (r = 0; r < inputcount; r++)
+                {
+                    if (argName == ("inputtype" + String(r)))
+                    {
+                        inputTypes[r] += (argValue.toInt() > 0 && argValue.toInt() < 3 ? argValue.toInt() : 0);
+                        break;
+                    }
+                    else if (argName == ("inputsend" + String(r)))
+                    {
+                        inputTypes[r] += 10 * (argValue.toInt() > 0 && argValue.toInt() < 4 ? argValue.toInt() : 0);
+                        break;
+                    }
+                    else if (argName == ("inputpin" + String(r)))
+                    {
+                        if (argValue.toInt() > 0 || argValue == "0")
+                            inputPins[r] = argValue.toInt();
+                        else
+                            inputPins[r] = -1;
+                        break;
+                    }
+                }
+                continue;
+            }
+            else if (argName == "ssid")
                 WF_ssidSTA = argValue;
             else if (argName == "ssidpass")
                 WF_passwordSTA = argValue;
@@ -377,21 +553,6 @@ void page_store()
                 MQTT_pass = argValue;
             else if (argName == "mqttclient")
                 MQTT_client = argValue;
-            else
-            {
-                for (byte r = 0; r < relaycount; r++)
-                {
-                    if (argName == ("onboot" + String(r)))
-                        relayOnBoot[r] = (argValue.toInt() > 0 ? 1 : 0);
-                    else if (argName == ("pinid" + String(r)))
-                    {
-                        if(argValue.toInt() > 0 || argValue == "0")
-                            relayPins[r] = argValue.toInt();
-                        else
-                            relayPins[r] = -1;
-                    }
-                }
-            }
         }
     }
 
@@ -451,6 +612,8 @@ void http_setup()
     httpserver.on("/setup", HTTP_GET, page_setup);
     httpserver.on("/mqtt", HTTP_GET, page_mqtt);
     httpserver.on("/relay", HTTP_GET, page_relay);
+    httpserver.on("/input", HTTP_GET, page_input);
+//    httpserver.on("/analog", HTTP_GET, page_analog);
     httpserver.on("/switch", HTTP_GET, page_switch);
     httpserver.on("/reset", HTTP_GET, page_reset);
     httpserver.on("/reboot", HTTP_GET, page_reboot);

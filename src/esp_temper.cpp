@@ -105,7 +105,9 @@ void TEMPER_handle()
             if (lastUpdate == 0)
                 lastUpdate = millis();
 
-            TEMPER_nexttimeout = TEMPER_timeout * 1000; //default timeout between temperature requests
+            TEMPER_nexttimeout = TEMPER_timeout * 1000 - 1000; //default timeout between temperature requests
+            if(TEMPER_nexttimeout < 1000)
+                TEMPER_nexttimeout = 1000;
         }
         lastTemp = millis();
         TEMPER_needrequest =! TEMPER_needrequest;

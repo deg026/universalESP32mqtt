@@ -4,7 +4,7 @@
 
 void RELAY_setup();
 
-void RELAY_handle();
+String RELAY_getInfo();
 
 void RELAY_switch(int id, bool setval);
 

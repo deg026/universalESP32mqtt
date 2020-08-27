@@ -8,8 +8,10 @@ String WF_passwordSTA;
 String WF_ssidSTA;
 
 uint32_t WF_ConnectTimeout = 60000;
-uint32_t WF_APtimeout = 300000; /* AP point 5 min TEMPER_timeout when lost WiFi connection*/
+uint32_t WF_APtimeout = 300000; // AP point 5 min timeout when lost WiFi connection
 uint32_t WF_APlast = 0;
+uint32_t WF_CHECKtimeout = 5000; // Check WiFi status every 5 sec
+uint32_t WF_CHECKnext = 0; // Check WiFi status every 5 sec
 
 
 void WF_AccessPoint()
@@ -50,11 +52,15 @@ void WF_setup()
 
 void WF_handle()
 {
-    /* Reconnect WiFi if disconnected */
-    if (
-            (WiFi.getMode() == WIFI_STA && WiFi.status() != WL_CONNECTED)
-            ||
-            (WiFi.getMode() == WIFI_AP && WF_ssidSTA.length() > 1 && millis() > (WF_APlast + WF_APtimeout))
-            )
-        WF_setup();
+    if(millis() > WF_CHECKnext)
+    {
+        /* Reconnect WiFi if disconnected */
+        if (
+                (WiFi.getMode() == WIFI_STA && WiFi.status() != WL_CONNECTED)
+                ||
+                (WiFi.getMode() == WIFI_AP && WF_ssidSTA.length() > 1 && millis() > (WF_APlast + WF_APtimeout))
+                )
+            WF_setup();
+        WF_CHECKnext = millis() + WF_CHECKtimeout;
+    }
 }
