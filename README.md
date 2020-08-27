@@ -14,11 +14,13 @@ easy to configure and install!
  - control and configuration via simple web interface (including relay switching commands, and read current sensors values)
  - access control by authorization using configurable user / password combinations (basic HTTP AUTH)
  - synchronization of all sensors values data with the MQTT server (for relays - in both way)
+ - automatically detecting connection lost from MQTT broker and reconnection automatically
  - OTA update - easy update using firmware upload via web interface
  - support for up to 10 temperature sensors connected via 1-wire, automatic search for sensors - no need to manually write addresses
    (a modified version of the library is used, which solved the problems of simultaneous operation of 1wire and wifi on esp32 chips)
  - control up to 10 OUTPUT pins switches (for relays etc)
  - control states up to 10 INPUT pins (in the settings it is possible to switch PULLUP and PULLDOWN modes)
+ - easy button configuration with bounce protection, allow to collect events: current status, single click, long click, double click
  - reading values of up to 5 analog signals from standard analog pins
  
  <b>IMPORTANT INFO:</b>
