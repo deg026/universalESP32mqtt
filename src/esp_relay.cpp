@@ -2,7 +2,7 @@
 #include <global.h>
 #include <esp_mqtt.h>
 
-uint8_t relaycount = 10;
+const uint8_t relaycount = 10;
 int8_t relayPins[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 bool relayOnBoot[] = {false, false, false, false, false, false, false, false, false, false};
 

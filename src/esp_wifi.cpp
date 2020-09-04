@@ -7,10 +7,10 @@ const char* WF_ssidAP = "esp32mqtt";
 String WF_passwordSTA;
 String WF_ssidSTA;
 
-uint32_t WF_ConnectTimeout = 60000;
-uint32_t WF_APtimeout = 300000; // AP point 5 min timeout when lost WiFi connection
+const uint32_t WF_ConnectTimeout = 60000;
+const uint32_t WF_APtimeout = 300000; // AP point 5 min timeout when lost WiFi connection
 uint32_t WF_APlast = 0;
-uint32_t WF_CHECKtimeout = 5000; // Check WiFi status every 5 sec
+const uint32_t WF_CHECKtimeout = 5000; // Check WiFi status every 5 sec
 uint32_t WF_CHECKnext = 0; // Check WiFi status every 5 sec
 
 

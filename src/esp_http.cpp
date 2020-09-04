@@ -5,6 +5,7 @@
 #include <esp_eeprom.h>
 #include <esp_relay.h>
 #include <esp_input.h>
+#include <esp_analog.h>
 #include <esp_mqtt.h>
 #include <esp_temper.h>
 
@@ -246,7 +247,8 @@ void page_root()
                + (tm > 60 ? String(int((tm + 1) / 60 % 60)) + "m " : "")
                + String(int(tm % 60)) + "s</b></p>"
                "<br><br><b>RELAYS:</b>" + RELAY_getInfo() +
-               "<br><br><b>INPUTS:</b>" + INPUT_getInfo();
+               "<br><br><b>INPUTS:</b>" + INPUT_getInfo() +
+               "<br><br><b>ANALOG:</b>" + ANALOG_getInfo();
 
 
     message += "<br><br><b>TEMPERATURE sensors:</b><br>" + TEMPER_getInfo();
@@ -360,6 +362,29 @@ void page_mqtt()
 </form>\
 ";
     HTML_page("MQTT Setup:", message);
+}
+
+
+void page_analog()
+{
+    if(!HTTP_auth())
+        return;
+
+    // language=HTML
+    String message = "<form id='analogform' name='analog' method='get' action='/store'>\
+<input type='hidden' name='analogsetup' value='1'>\
+<table border='0'><tr><td><b>PIN IDs:</b>\
+";
+    byte i;
+
+    for (i = 0; i < analogcount; i++)
+    {
+        message += "<br>#" + String(i) + ": <input type='text' size='2' name='apinid" + String(i) + "' value='" + (analogPins[i] > -1 ? String(analogPins[i]) : "") + "'>";
+    }
+
+    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
+
+    HTML_page("Analog Setup:", message);
 }
 
 
@@ -495,10 +520,7 @@ void page_store()
                     }
                     else if (argName == ("pinid" + String(r)))
                     {
-                        if (argValue.toInt() > 0 || argValue == "0")
-                            relayPins[r] = argValue.toInt();
-                        else
-                            relayPins[r] = -1;
+                        relayPins[r] = (argValue.toInt() > 0 || argValue == "0" ? argValue.toInt() : -1);
                         break;
                     }
                 }
@@ -520,10 +542,19 @@ void page_store()
                     }
                     else if (argName == ("inputpin" + String(r)))
                     {
-                        if (argValue.toInt() > 0 || argValue == "0")
-                            inputPins[r] = argValue.toInt();
-                        else
-                            inputPins[r] = -1;
+                        inputPins[r] = (argValue.toInt() > 0 || argValue == "0" ? argValue.toInt() : -1);
+                        break;
+                    }
+                }
+                continue;
+            }
+            else if(isAnalogSetup)
+            {
+                for (r = 0; r < analogcount; r++)
+                {
+                    if (argName == ("apinid" + String(r)))
+                    {
+                        analogPins[r] = (argValue.toInt() > 0 && argValue.toInt() < 99 ? argValue.toInt() : -1);
                         break;
                     }
                 }
@@ -613,7 +644,7 @@ void http_setup()
     httpserver.on("/mqtt", HTTP_GET, page_mqtt);
     httpserver.on("/relay", HTTP_GET, page_relay);
     httpserver.on("/input", HTTP_GET, page_input);
-//    httpserver.on("/analog", HTTP_GET, page_analog);
+    httpserver.on("/analog", HTTP_GET, page_analog);
     httpserver.on("/switch", HTTP_GET, page_switch);
     httpserver.on("/reset", HTTP_GET, page_reset);
     httpserver.on("/reboot", HTTP_GET, page_reboot);

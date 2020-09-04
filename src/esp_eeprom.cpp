@@ -2,9 +2,6 @@
 #include <Preferences.h>
 
 int8_t LED_PIN = 5;
-uint8_t analogcount = 5;
-int8_t analogPins[] = {-1, -1, -1, -1, -1};
-
 
 Preferences prefs;
 

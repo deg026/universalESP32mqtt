@@ -6,6 +6,7 @@
 #include "esp_mqtt.h"
 #include "esp_relay.h"
 #include "esp_input.h"
+#include "esp_analog.h"
 #include "esp_temper.h"
 
 const char* appversion = "0.26";
@@ -20,6 +21,7 @@ void setup()
     MQTT_setup();
     RELAY_setup();
     INPUT_setup();
+    ANALOG_setup();
 }
 
 void loop()
@@ -30,6 +32,7 @@ void loop()
     MQTT_handle();
     TEMPER_handle();
     INPUT_handle();
+    ANALOG_handle();
 }
 
 /**

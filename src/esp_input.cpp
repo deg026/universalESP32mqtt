@@ -8,7 +8,7 @@ uint32_t buttonDoubleClickInterval = 750;
 uint32_t buttonLastClick[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t inputLastChange[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 bool inputLastState[] = {false, false, false, false, false, false, false, false, false, false};
-uint8_t inputcount = 10;
+const uint8_t inputcount = 10;
 int8_t inputPins[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 int8_t inputTypes[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int8_t inputTrueSignal[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
@@ -94,7 +94,7 @@ String INPUT_getInfo()
         if (inputPins[i] > -1)
         {
             message += " <span class='inputinfo";
-            if (digitalRead(inputPins[i]) == inputTrueSignal[i])
+            if (inputLastState[i])
                 message += " inputon";
 
             message += "'>" + String(inputPins[i]) + "</span>";
