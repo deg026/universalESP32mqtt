@@ -7,8 +7,8 @@ it is maximum flexible and detailed customizable client for managing DIY IoT dev
 easy to configure and install!
 
 <b>PCB Project<b>
-in additional for this project was developed prototype board and it is available now in the public EasyEDA access:
-<a href='https://easyeda.com/deg026/esp32-120-85'>https://easyeda.com/deg026/esp32-120-85</a>
+in additional for this project was developed prototype board and it is available now in the public EasyEDA access:<br>
+<a href='https://easyeda.com/deg026/esp32-120-85'>https://easyeda.com/deg026/esp32-120-85</a><br>
 You can easily order its production through jlcpcb.com, just for about 5$
 
 <b>MAIN FEATURES:</b>
