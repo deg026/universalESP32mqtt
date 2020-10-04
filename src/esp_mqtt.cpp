@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <esp_relay.h>
+#include <esp_http.h>
 
 String MQTT_user;
 String MQTT_client = "ESP_mqtt";
@@ -87,8 +88,36 @@ bool MQTT_connect() {
 }
 
 
+void page_mqtt()
+{
+    if(!HTTP_auth())
+        return;
+
+    // language=HTML
+    String message = "\
+<form id='mqttform' name='mqtt' method='get' action='/store'>\
+<b>Server:</b>\
+<br><input type='text' name='mqttserver' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_server) + "'>\
+ (leave blank to ignore MQTT)\
+<br><b>Port:</b>\
+<br><input type='text' name='mqttport' maxlength=5 value='" + String(MQTT_port) + "'>\
+<br><b>Client name:</b>\
+<br><input type='text' name='mqttclient' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_client) + "'>\
+<br><b>User:</b> (if authorization is required on MQTT server)\
+<br><input type='text' name='mqttuser' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_user) + "'>\
+ (leave blank to ignore MQTT authorization)\
+<br><b>Password:</b>\
+<br><input type='password' name='mqttpass' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_pass) + "'>\
+<br><input type='submit' value='Save'>\
+</form>\
+";
+    HTML_page("MQTT Setup:", message);
+}
+
+
 void MQTT_setup()
 {
+    httpserver.on("/mqtt", HTTP_GET, page_mqtt);
     if (MQTT_server.length() && MQTT_port > 0)
     {
         pubsubClient.setServer(MQTT_server.c_str(), MQTT_port);

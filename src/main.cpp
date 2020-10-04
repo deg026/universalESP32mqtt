@@ -10,6 +10,7 @@
 #include "esp_temper.h"
 
 const char* appversion = "0.26";
+const char* appdate = "06.09.2020";
 
 void setup()
 {

@@ -1,7 +1,7 @@
 #include <global.h>
 #include <Preferences.h>
 
-int8_t LED_PIN = 5;
+int8_t LED_PIN = 2;
 
 Preferences prefs;
 
@@ -24,23 +24,27 @@ void eeprom_writeConfig()
     prefs.putChar("LED_PIN", LED_PIN);
     prefs.putChar("ONEWIRE_PIN", ONEWIRE_PIN);
     prefs.putUShort("TEMPER_timeout", TEMPER_timeout);
+    prefs.putUShort("ANALOG_CHECK", ANALOG_CHECKtimeout);
 
     byte i;
 
     for (i = 0; i < relaycount; i++)
+    {
         prefs.putBool(("relayOnBoot" + String(i)).c_str(), relayOnBoot[i]);
-
-    for (i = 0; i < relaycount; i++)
         prefs.putChar(("relayPins" + String(i)).c_str(), relayPins[i]);
+    }
 
     for (i = 0; i < inputcount; i++)
+    {
         prefs.putChar(("inputPins" + String(i)).c_str(), inputPins[i]);
-
-    for (i = 0; i < inputcount; i++)
         prefs.putChar(("inputTypes" + String(i)).c_str(), inputTypes[i]);
+    }
 
     for (i = 0; i < analogcount; i++)
+    {
         prefs.putChar(("analogPins" + String(i)).c_str(), analogPins[i]);
+        prefs.putBool(("analogSmooth" + String(i)).c_str(), analogSmooth[i]);
+    }
 
 }
 
@@ -63,23 +67,27 @@ void eeprom_readConfig()
         LED_PIN = prefs.getChar("LED_PIN", LED_PIN);
         ONEWIRE_PIN = prefs.getChar("ONEWIRE_PIN", ONEWIRE_PIN);
         TEMPER_timeout = prefs.getUShort("TEMPER_timeout", TEMPER_timeout);
+        ANALOG_CHECKtimeout = prefs.getUShort("ANALOG_CHECK", ANALOG_CHECKtimeout);
 
         byte i;
 
         for (i = 0; i < relaycount; i++)
+        {
             relayOnBoot[i] = prefs.getBool(("relayOnBoot" + String(i)).c_str(), relayOnBoot[i]);
-
-        for (i = 0; i < relaycount; i++)
             relayPins[i] = prefs.getChar(("relayPins" + String(i)).c_str(), relayPins[i]);
+        }
 
         for (i = 0; i < inputcount; i++)
+        {
             inputPins[i] = prefs.getChar(("inputPins" + String(i)).c_str(), inputPins[i]);
-
-        for (i = 0; i < inputcount; i++)
             inputTypes[i] = prefs.getChar(("inputTypes" + String(i)).c_str(), inputTypes[i]);
+        }
 
         for (i = 0; i < analogcount; i++)
+        {
             analogPins[i] = prefs.getChar(("analogPins" + String(i)).c_str(), analogPins[i]);
+            analogSmooth[i] = prefs.getBool(("analogSmooth" + String(i)).c_str(), analogSmooth[i]);
+        }
     }
 }
 

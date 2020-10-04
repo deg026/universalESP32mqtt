@@ -181,7 +181,7 @@ function openUrl(url) {\
 }\
 </script>\
 </head>\
-<body><h2>ESP mqtt v" + String(appversion) + "</h2>\
+<body><h2>ESP mqtt v" + String(appversion) + " <sup>(" + String(appdate) + ")</sup></h2>\
 <input type='button' value='Dashboard' onclick=\"location.href='/';\">\
 <input type='button' value='Base setup' onclick=\"location.href='/setup';\">\
 <input type='button' value='MQTT' onclick=\"location.href='/mqtt';\">\
@@ -338,141 +338,6 @@ void page_setup()
 }
 
 
-void page_mqtt()
-{
-    if(!HTTP_auth())
-        return;
-
-    // language=HTML
-    String message = "\
-<form id='mqttform' name='mqtt' method='get' action='/store'>\
-<b>Server:</b>\
-<br><input type='text' name='mqttserver' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_server) + "'>\
- (leave blank to ignore MQTT)\
-<br><b>Port:</b>\
-<br><input type='text' name='mqttport' maxlength=5 value='" + String(MQTT_port) + "'>\
-<br><b>Client name:</b>\
-<br><input type='text' name='mqttclient' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_client) + "'>\
-<br><b>User:</b> (if authorization is required on MQTT server)\
-<br><input type='text' name='mqttuser' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_user) + "'>\
- (leave blank to ignore MQTT authorization)\
-<br><b>Password:</b>\
-<br><input type='password' name='mqttpass' maxlength=" + String(maxStrParamLength) + " value='" + quoteEscape(MQTT_pass) + "'>\
-<br><input type='submit' value='Save'>\
-</form>\
-";
-    HTML_page("MQTT Setup:", message);
-}
-
-
-void page_analog()
-{
-    if(!HTTP_auth())
-        return;
-
-    // language=HTML
-    String message = "<form id='analogform' name='analog' method='get' action='/store'>\
-<input type='hidden' name='analogsetup' value='1'>\
-<table border='0'><tr><td><b>PIN IDs:</b>\
-";
-    byte i;
-
-    for (i = 0; i < analogcount; i++)
-    {
-        message += "<br>#" + String(i) + ": <input type='text' size='2' name='apinid" + String(i) + "' value='" + (analogPins[i] > -1 ? String(analogPins[i]) : "") + "'>";
-    }
-
-    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
-
-    HTML_page("Analog Setup:", message);
-}
-
-
-void page_relay()
-{
-    if(!HTTP_auth())
-        return;
-
-    // language=HTML
-    String message = "<form id='relayform' name='relay' method='get' action='/store'>\
-<input type='hidden' name='relaysetup' value='1'>\
-<table border='0'><tr><td><b>PIN IDs:</b>\
-";
-    byte i;
-
-    for (i = 0; i < relaycount; i++)
-    {
-        message += "<br>#" + String(i) + ": <input type='text' size='2' name='pinid" + String(i) + "' value='" + (relayPins[i] > -1 ? String(relayPins[i]) : "") + "'>";
-    }
-
-    message += "</td><td><b>State on boot:</b>";
-
-    for (i = 0; i < relaycount; i++)
-    {
-        message += "<br><input type='radio' name='onboot" + String(i) + "' value='1' ";
-        if (relayOnBoot[i]) message += "checked ";
-        message += "> ON &nbsp; <input type='radio' name='onboot" + String(i) + "' value='0' ";
-        if (! relayOnBoot[i]) message += "checked ";
-        message += "> OFF";
-    }
-
-    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
-
-    HTML_page("Relay Setup:", message);
-}
-
-
-void page_input()
-{
-    if(!HTTP_auth())
-        return;
-
-    // language=HTML
-    String message = "<form id='inputform' name='input' method='get' action='/store'>\
-<input type='hidden' name='inputsetup' value='1'>\
-<table border='0'><tr><td style='padding-right: 15px;'><b>PIN IDs:</b>\
-";
-    byte i;
-
-    for (i = 0; i < inputcount; i++)
-    {
-        message += "<br>#" + String(i) + ": <input type='text' size='2' name='inputpin" + String(i) + "' value='" + (inputPins[i] > -1 ? String(inputPins[i]) : "") + "'>";
-    }
-
-    message += "</td><td style='border-left: dashed 1px black;padding: 0px 15px;'><b>Input type:</b>";
-
-    for (i = 0; i < relaycount; i++)
-    {
-        message += "<br><input type='radio' name='inputtype" + String(i) + "' value='0' ";
-        if (inputTypes[i] % 10 == 0) message += "checked ";
-        message += "> NORMAL &nbsp; <input type='radio' name='inputtype" + String(i) + "' value='1' ";
-        if (inputTypes[i] % 10 == 1) message += "checked ";
-        message += "> PULLUP &nbsp; <input type='radio' name='inputtype" + String(i) + "' value='2' ";
-        if (inputTypes[i] % 10 == 2) message += "checked ";
-        message += "> PULLDOWN";
-    }
-
-    message += "</td><td style='border-left: dashed 1px black;padding: 0px 15px;'><b>MTQQ send:</b>";
-
-    for (i = 0; i < relaycount; i++)
-    {
-        message += "<br><input type='radio' name='inputsend" + String(i) + "' value='0' ";
-        if (inputTypes[i] < 10) message += "checked ";
-        message += "> HIGH & LOW &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='1' ";
-        if (inputTypes[i] >= 10 && inputTypes[i] < 20) message += "checked ";
-        message += "> only HIGH &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='2' ";
-        if (inputTypes[i] >= 20 && inputTypes[i] < 30) message += "checked ";
-        message += "> only LOW &nbsp; <input type='radio' name='inputsend" + String(i) + "' value='3' ";
-        if (inputTypes[i] >= 30) message += "checked ";
-        message += "> BUTTON (click, longpress, dblclick)";
-    }
-
-    message += "</td></tr></table><br><input type='submit' value='Save'></form>" + bestpins;
-
-    HTML_page("Inputs Setup:", message);
-}
-
-
 void page_store()
 {
     if(!HTTP_auth())
@@ -493,12 +358,20 @@ void page_store()
             relayPins[r] = -1;
         }
     }
-    if(isInputSetup)
+    else if(isInputSetup)
     {
         for (r = 0; r < inputcount; r++)
         {
             inputTypes[r] = 0;
             inputPins[r] = -1;
+        }
+    }
+    else if(isAnalogSetup)
+    {
+        for (r = 0; r < analogcount; r++)
+        {
+            analogPins[r] = -1;
+            analogSmooth[r] = false;
         }
     }
 
@@ -515,7 +388,7 @@ void page_store()
                 {
                     if (argName == ("onboot" + String(r)))
                     {
-                        relayOnBoot[r] = (argValue.toInt() > 0 ? 1 : 0);
+                        relayOnBoot[r] = (argValue.toInt() > 0);
                         break;
                     }
                     else if (argName == ("pinid" + String(r)))
@@ -550,14 +423,22 @@ void page_store()
             }
             else if(isAnalogSetup)
             {
-                for (r = 0; r < analogcount; r++)
-                {
-                    if (argName == ("apinid" + String(r)))
+                if (argName == "analogupdate" && argValue.toInt() > 1)
+                    ANALOG_CHECKtimeout = argValue.toInt();
+                else
+                    for (r = 0; r < analogcount; r++)
                     {
-                        analogPins[r] = (argValue.toInt() > 0 && argValue.toInt() < 99 ? argValue.toInt() : -1);
-                        break;
+                        if (argName == ("apinid" + String(r)))
+                        {
+                            analogPins[r] = (argValue.toInt() > 0 && argValue.toInt() < 99 ? argValue.toInt() : -1);
+                            break;
+                        }
+                        if (argName == ("smoothid" + String(r)))
+                        {
+                            analogSmooth[r] = (argValue.toInt() > 0);
+                            break;
+                        }
                     }
-                }
                 continue;
             }
             else if (argName == "ssid")
@@ -599,20 +480,6 @@ Configuration stored successfully.\
 }
 
 
-void page_switch()
-{
-    if(!HTTP_auth())
-        return;
-
-    int id = httpserver.arg("s").toInt();
-    String on = httpserver.arg("on");
-
-    RELAY_switch(id, on == "true");
-
-    httpserver.send(200, "text/html", "OK");
-}
-
-
 void page_reboot()
 {
     if(!HTTP_auth())
@@ -641,11 +508,6 @@ void http_setup()
     httpserver.on("/", HTTP_GET, page_root);
     httpserver.on("/store", HTTP_GET, page_store);
     httpserver.on("/setup", HTTP_GET, page_setup);
-    httpserver.on("/mqtt", HTTP_GET, page_mqtt);
-    httpserver.on("/relay", HTTP_GET, page_relay);
-    httpserver.on("/input", HTTP_GET, page_input);
-    httpserver.on("/analog", HTTP_GET, page_analog);
-    httpserver.on("/switch", HTTP_GET, page_switch);
     httpserver.on("/reset", HTTP_GET, page_reset);
     httpserver.on("/reboot", HTTP_GET, page_reboot);
     httpserver.on("/firmware", HTTP_GET, page_firmware);
@@ -655,6 +517,8 @@ void http_setup()
 
         httpserver.sendHeader("Connection", "close");
         httpserver.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+        delay(150);
+        httpserver.client().stop();
         ESP.restart();
     }, []() {
         if(!HTTP_auth())
@@ -663,7 +527,8 @@ void http_setup()
         HTTPUpload& upload = httpserver.upload();
         if (upload.status == UPLOAD_FILE_START)
         {
-            Update.begin(UPDATE_SIZE_UNKNOWN);
+            uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+            Update.begin(maxSketchSpace, U_FLASH);
         }
         else if (upload.status == UPLOAD_FILE_WRITE)
         {
@@ -672,6 +537,10 @@ void http_setup()
         else if (upload.status == UPLOAD_FILE_END)
         {
             Update.end(true);
+        }
+        else if (upload.status == UPLOAD_FILE_ABORTED)
+        {
+            Update.end();
         }
     });
     httpserver.begin();
