@@ -6,6 +6,11 @@
 it is maximum flexible and detailed customizable client for managing DIY IoT devices based on ESP 32 platforms
 easy to configure and install!
 
+<b>PCB Project<b>
+in additional for this project was developed prototype board and it is available now in the public EasyEDA access:
+<a href='https://easyeda.com/deg026/esp32-120-85'>https://easyeda.com/deg026/esp32-120-85</a>
+You can easily order its production through jlcpcb.com, just for about 5$
+
 <b>MAIN FEATURES:</b>
  - stable work via WiFi connection
  - start configuration via WiFi AP and web browser
